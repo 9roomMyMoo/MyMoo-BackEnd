@@ -63,6 +63,7 @@ public class SecurityConfig {
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .requestMatchers("/api/v1/account/signup", "/api/v1/auth/login").permitAll()
                 .requestMatchers("/api/v1/oauth/**").permitAll()
+                .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/**").permitAll() // TODO - 수정
                 .anyRequest().authenticated() // 나머지 요청은 인증 필요
         );
