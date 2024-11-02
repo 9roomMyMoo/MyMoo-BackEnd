@@ -1,6 +1,5 @@
 package com.example.mymoo.domain.account.repository;
 
-
 import com.example.mymoo.domain.account.entity.Account;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
