@@ -12,14 +12,13 @@ import com.example.mymoo.domain.store.repository.StoreRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.cfg.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -33,7 +32,6 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,19 +43,22 @@ public class StoreServiceImpl implements StoreService{
     private final AddressNewRepository addressNewRepository;
     private final AccountRepository accountRepository;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    private final int All_PAGE = 19;
     private final int PAGE_SIZE = 1000;
 
     @Value("${api.storeData.uri}") String uri;
     @Value("${api.storeData.key}") String key;
 
     @PostConstruct @Transactional
-    @Scheduled(cron = "0 */10 * * * *")
     public void updateStore(){
-        System.out.println("업데이트 시작...");
+        log.info("Storing Table Update Start...");
         List<Store> legecyStores = storeRepository.findAll();
         List<Row> allRows = new ArrayList<>();
 
-        for (int i=1;i<=17;i++) {
+        log.info("Receiving Data from OpenAPI Start...");
+        for (int i=1; i<=All_PAGE; i++) {
             URI requestUrl = UriComponentsBuilder
                     .fromUriString(uri)
                     .queryParam("key", key)
@@ -103,14 +104,19 @@ public class StoreServiceImpl implements StoreService{
                                     .build()
                     );
                 }
+                log.info(i+"th Page recived (DataSize = "+ rowDocs.getLength() +")");
+
             } catch (ParserConfigurationException | IOException | SAXException e) {
                 throw new RuntimeException(e);
             }
         }
-
+        log.info("Receiving Data from OpenAPI Complete (" + allRows.size() +" number of Data Received)");
+        log.info("Storing New Data Start...");
+        int updated = 0;
         for (Row row : allRows) {
-            boolean isNew = legecyStores.stream().parallel().noneMatch(store -> store.getZipCode().equals(row.getZipcode()));
+            boolean isNew = legecyStores.stream().noneMatch(store -> store.getName().equals(row.getName()));
             if (isNew) {
+                updated += 1;
                 Store newStore = Store.builder()
                         .name(row.getName())
                         .visitCount(0)
@@ -121,11 +127,13 @@ public class StoreServiceImpl implements StoreService{
                         .build();
 
                 storeRepository.save(newStore);
+
                 addressOldRepository.save(AddressOld.convertToAddress(row.getAdderssOld(), newStore));
                 addressNewRepository.save(AddressNew.convertToAddress(row.getAddressNew(), newStore));
 
             }
         }
-
+        log.info(updated + " number of Rows Updating Complete");
+        log.info("Storing Table Update Complete");
     }
 }
