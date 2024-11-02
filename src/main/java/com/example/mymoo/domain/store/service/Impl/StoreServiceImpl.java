@@ -1,7 +1,6 @@
-package com.example.mymoo.domain.store.service;
+package com.example.mymoo.domain.store.service.Impl;
 
 import com.example.mymoo.domain.account.repository.AccountRepository;
-import com.example.mymoo.domain.store.dto.response.GDreamCardResponse;
 import com.example.mymoo.domain.store.dto.response.Row;
 import com.example.mymoo.domain.store.entity.AddressNew;
 import com.example.mymoo.domain.store.entity.AddressOld;
@@ -9,6 +8,7 @@ import com.example.mymoo.domain.store.entity.Store;
 import com.example.mymoo.domain.store.repository.AddressNewRepository;
 import com.example.mymoo.domain.store.repository.AddressOldRepository;
 import com.example.mymoo.domain.store.repository.StoreRepository;
+import com.example.mymoo.domain.store.service.StoreService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
