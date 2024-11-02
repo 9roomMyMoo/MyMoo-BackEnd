@@ -35,7 +35,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class StoreServiceImpl implements StoreService{
+public class StoreServiceImpl implements StoreService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final StoreRepository storeRepository;
@@ -45,8 +45,8 @@ public class StoreServiceImpl implements StoreService{
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final int All_PAGE = 19;
-    private final int PAGE_SIZE = 1000;
+    private final int All_PAGE = 10;
+    private final int PAGE_SIZE = 10;
 
     @Value("${api.storeData.uri}") String uri;
     @Value("${api.storeData.key}") String key;
