@@ -1,8 +1,12 @@
 package com.example.mymoo.domain.account.service.impl;
 
 import com.example.mymoo.domain.account.dto.request.AccountCreateRequestDto;
+import com.example.mymoo.domain.account.dto.request.ChargePointsRequestDto;
 import com.example.mymoo.domain.account.dto.response.AccountCreateResponseDto;
+import com.example.mymoo.domain.account.dto.response.ChargePointsResponseDto;
 import com.example.mymoo.domain.account.entity.Account;
+import com.example.mymoo.domain.account.exception.AccountException;
+import com.example.mymoo.domain.account.exception.AccountExceptionDetails;
 import com.example.mymoo.domain.account.repository.AccountRepository;
 import com.example.mymoo.domain.account.service.AccountService;
 import com.example.mymoo.global.enums.UserRole;
@@ -22,20 +26,37 @@ public class AccountServiceImpl implements AccountService {
     public AccountCreateResponseDto signup(final AccountCreateRequestDto accountCreateRequestDto) {
         // 사용 가능한 이메일인지 확인
         if (accountRepository.existsByEmail(accountCreateRequestDto.email())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new AccountException(AccountExceptionDetails.EMAIL_ALREADY_EXISTS);
         }
 
         Account savedAccount = accountRepository.save(
             Account.builder()
                 .email(accountCreateRequestDto.email())
                 .password(passwordEncoder.encode(accountCreateRequestDto.password()))
+                .nickname(accountCreateRequestDto.nickname())
+                .profileImageUrl("defaultImageUrl") // TODO - S3 default image url로 변경
                 .phoneNumber(accountCreateRequestDto.phoneNumber())
+                .point(0L)
                 .role(UserRole.valueOf(accountCreateRequestDto.userRole()))
                 .build()
         );
 
         return AccountCreateResponseDto.builder()
             .accountId(savedAccount.getId())
+            .build();
+    }
+
+    @Override
+    public ChargePointsResponseDto chargePoints(
+        final Long accountId,
+        final ChargePointsRequestDto chargePointsRequestDto
+    ) {
+        Account account = accountRepository.findById(accountId)
+            .orElseThrow(() -> new AccountException(AccountExceptionDetails.ACCOUNT_NOT_FOUND));
+
+        account.chargePoint(chargePointsRequestDto.point());
+        return ChargePointsResponseDto.builder()
+            .point(account.getPoint())
             .build();
     }
 }
