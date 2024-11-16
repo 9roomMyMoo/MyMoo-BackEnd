@@ -3,6 +3,8 @@ package com.example.mymoo.global.auth.service.impl;
 import com.example.mymoo.global.auth.dto.request.AccountLoginRequestDto;
 import com.example.mymoo.global.auth.dto.response.AccountLoginResponseDto;
 import com.example.mymoo.global.auth.dto.response.TokenRefreshResponseDto;
+import com.example.mymoo.global.auth.exception.AuthException;
+import com.example.mymoo.global.auth.exception.AuthExceptionDetails;
 import com.example.mymoo.global.auth.repository.AuthRepository;
 import com.example.mymoo.global.auth.service.AuthService;
 import com.example.mymoo.global.security.CustomUserDetails;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,14 +53,20 @@ public class AuthServiceImpl implements AuthService {
             JwtTokenProvider.REFRESH_TOKEN_VALIDITY
         );
 
+        String userRole = customUserDetails.getAuthorities().stream()
+            .findFirst()
+            .map(GrantedAuthority::getAuthority)
+            .orElse(null); // 권한이 없는 경우 null 반환
         return AccountLoginResponseDto.builder()
             .accountId(accountId)
+            .userRole(userRole)
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .build();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TokenRefreshResponseDto getNewAccessToken(String refreshToken) {
         // refresh 토큰 유효성 검사
         Claims claims = jwtTokenProvider.getClaimsFromToken(refreshToken); // throws jwtException
@@ -66,9 +75,9 @@ public class AuthServiceImpl implements AuthService {
 
         // 저장된 Refresh 토큰과 비교
         String savedRefreshToken = authRepository.findRefreshTokenByAccountId(accountId)
-            .orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+            .orElseThrow(() -> new AuthException(AuthExceptionDetails.NOT_FOUND_REFRESH_TOKEN));
         if (!savedRefreshToken.equals(refreshToken)) {
-            throw new IllegalArgumentException("Refresh token mismatch");
+            throw new AuthException(AuthExceptionDetails.NOT_VALID_REFRESH_TOKEN);
         }
 
         // 새로운 액세스 토큰 생성

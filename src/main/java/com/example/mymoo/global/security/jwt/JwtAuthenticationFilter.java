@@ -1,5 +1,6 @@
 package com.example.mymoo.global.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -7,6 +8,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,7 +47,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (JwtException e) {
             log.error("JWT 토큰 오류: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("JWT 토큰 오류: " + e.getMessage());
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+            errorResponse.put("message", e.getMessage());
+
+            String jsonResponse = mapper.writeValueAsString(errorResponse);
+            response.getWriter().write(jsonResponse);
             return;
         }
         filterChain.doFilter(request, response);
