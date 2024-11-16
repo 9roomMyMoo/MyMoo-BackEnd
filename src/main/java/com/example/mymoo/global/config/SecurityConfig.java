@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true) // @PreAuthorize 활성화
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -61,7 +63,9 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(authorizeHttpRequests ->
             authorizeHttpRequests
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                .requestMatchers("/api/v1/account/signup", "/api/v1/auth/login").permitAll()
+                .requestMatchers("/api/v1/account/signup").permitAll()
+                .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers("/api/v1/auth/token/refresh").permitAll()
                 .requestMatchers("/api/v1/oauth/**").permitAll()
                 .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/**").permitAll() // TODO - 수정
@@ -85,7 +89,7 @@ public class SecurityConfig {
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedMethods(
-            Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         corsConfiguration.setExposedHeaders(List.of("Authorization"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
