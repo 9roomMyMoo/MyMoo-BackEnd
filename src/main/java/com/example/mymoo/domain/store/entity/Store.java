@@ -2,6 +2,8 @@ package com.example.mymoo.domain.store.entity;
 
 import com.example.mymoo.domain.account.entity.Account;
 import com.example.mymoo.domain.store.dto.response.GDreamCardResponse;
+import com.example.mymoo.domain.store.exception.StoreException;
+import com.example.mymoo.domain.store.exception.StoreExceptionDetails;
 import com.example.mymoo.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -102,8 +104,7 @@ public class Store extends BaseEntity {
             throw new IllegalArgumentException("사용 금액은 0 이하일 수 없습니다.");
         }
         if (this.usableDonation < amount) {
-            // TODO - custom exception 이용
-            // throw new IllegalArgumentException("후원 금액이 부족합니다.");
+            throw new StoreException(StoreExceptionDetails.NOT_ENOUGH_STORE_POINT);
         }
         this.usableDonation -= amount;
     }
