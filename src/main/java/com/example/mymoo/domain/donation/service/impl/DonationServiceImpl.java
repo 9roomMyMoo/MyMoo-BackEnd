@@ -40,10 +40,10 @@ public class DonationServiceImpl implements DonationService {
             .orElseThrow(() -> new StoreException(StoreExceptionDetails.STORE_NOT_FOUND));
         Long point = donationRequestDto.point();
 
-        // 후원 반영
+        // 후원자의 point 감소
         account.usePoint(point);
+        // 가게의 사용 가능한 후원 금액 증가
         store.addUsableDonation(point);
-
         // 후원 정보 저장
         donationRepository.save(
             Donation.builder()
@@ -62,10 +62,16 @@ public class DonationServiceImpl implements DonationService {
     ) {
         Donation donation = donationRepository.findById(donationId)
             .orElseThrow(() -> new DonationException(DonationExceptionDetails.DONATION_NOT_FOUND));
+        Store store = donation.getStore();
         // 자신의 가게가 아닌 다른 가게의 후원을 사용하려 할 때
-        if (!Objects.equals(storeId, donation.getStore().getId())){
+        if (!Objects.equals(storeId, store.getId())){
             throw new DonationException(DonationExceptionDetails.FORBIDDEN_ACCESS_TO_OTHER_STORE);
         }
+        // 사용 여부 업데이트
         donation.setIsUsedToTrue();
+        // 사용 가능한 후원 금액 감소
+        store.useUsableDonation(donation.getPoint());
+        // store 계정의 point 증가. 향후 현금으로 바꿀 수 있음
+        store.getAccount().chargePoint(donation.getPoint());
     }
 }

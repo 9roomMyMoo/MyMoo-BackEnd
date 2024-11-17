@@ -52,7 +52,7 @@ public class DonationController {
     }
 
     @Operation(
-        summary = "[음식점] 특정 후원의 사용 여부를 true로 변경",
+        summary = "[음식점] 특정 후원을 사용 처리",
         description = "음식점 계정에서 QR코드 인식 시 해당 API를 호출합니다. 음식점 계정의 Access token을 header에 넣었는지 확인해주세요",
         responses = {
             @ApiResponse(responseCode = "200", description = "수정 성공"),

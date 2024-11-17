@@ -3,6 +3,7 @@ package com.example.mymoo.global.oauth.service.impl;
 import com.example.mymoo.domain.account.entity.Account;
 import com.example.mymoo.domain.account.repository.AccountRepository;
 import com.example.mymoo.global.auth.repository.AuthRepository;
+import com.example.mymoo.global.enums.UserRole;
 import com.example.mymoo.global.oauth.dto.kakao.KakaoTokenResponse;
 import com.example.mymoo.global.oauth.dto.kakao.KakaoUserInfo;
 import com.example.mymoo.global.oauth.dto.response.KakaoLoginResponseDto;
@@ -49,11 +50,13 @@ public class OauthServiceImpl implements OAuthService {
 
     @Override
     public String getKakaoAuthorizationUrl() {
+        // https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-code-additional-consent
         return UriComponentsBuilder.fromUriString(kakaoAuthorizationUri)
             .queryParam("response_type", "code")
             .queryParam("client_id", kakaoClientId)
             .queryParam("redirect_uri", kakaoRedirectUri) // TODO - 배포 시 변경
-            .queryParam("scope", "account_email")
+            // https://developers.kakao.com/docs/latest/ko/kakaologin/utilize#scope-user
+            .queryParam("scope", "profile_nickname,profile_image,account_email")
             .toUriString();
     }
 
@@ -107,7 +110,8 @@ public class OauthServiceImpl implements OAuthService {
             .uri(kakaoUserInfoUri)
             .header("Authorization", "Bearer " + accessToken)
             .header("Content-type", "application/x-www-form-urlencoded;charset=utf-8")
-            .body(BodyInserters.fromFormData("property_keys", "[\"kakao_account.email\"]"))
+            // https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#propertykeys
+            .body(BodyInserters.fromFormData("property_keys", "[\"kakao_account.email\",\"kakao_account.profile\"]"))
             .retrieve()
             .bodyToMono(KakaoUserInfo.class)
             .block(); // 동기 요청
@@ -116,9 +120,19 @@ public class OauthServiceImpl implements OAuthService {
     private Account createNewAccount(KakaoUserInfo userInfo) {
         String kakaoUserEmail = userInfo.id() + "_" + userInfo.kakaoAccount().email();
         String password = passwordEncoder.encode(UUID.randomUUID().toString());
+        String nickname = userInfo.kakaoAccount().profile().nickname();
+        String profileImageUrl = userInfo.kakaoAccount().profile().profileImageUrl();
+        log.info("received kakao data. email: {} nickname: {} profileImageUrl: {}", kakaoUserEmail, nickname, profileImageUrl);
+        if (profileImageUrl == null){
+            profileImageUrl = "DefaultProfileImageUrl"; // TODO - S3 기본 이미지 이용
+        }
         return Account.builder()
             .email(kakaoUserEmail)
             .password(password)
+            .nickname(nickname)
+            .profileImageUrl(profileImageUrl)
+            .point(0L)
+            .role(UserRole.DONATOR) // default 계정 : 후원자
             .build();
     }
 
@@ -137,6 +151,7 @@ public class OauthServiceImpl implements OAuthService {
         // Jwt 및 로그인 정보 전달
         return KakaoLoginResponseDto.builder()
             .accountId(account.getId())
+            .userRole(String.valueOf(account.getRole()))
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .isNewUser(isNewUser)
