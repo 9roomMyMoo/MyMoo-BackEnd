@@ -2,6 +2,7 @@ package com.example.mymoo.domain.store.service.Impl;
 
 import com.example.mymoo.domain.account.repository.AccountRepository;
 import com.example.mymoo.domain.store.dto.response.Row;
+import com.example.mymoo.domain.store.dto.response.StoreListDTO;
 import com.example.mymoo.domain.store.entity.AddressNew;
 import com.example.mymoo.domain.store.entity.AddressOld;
 import com.example.mymoo.domain.store.entity.Store;
@@ -9,12 +10,15 @@ import com.example.mymoo.domain.store.repository.AddressNewRepository;
 import com.example.mymoo.domain.store.repository.AddressOldRepository;
 import com.example.mymoo.domain.store.repository.StoreRepository;
 import com.example.mymoo.domain.store.service.StoreService;
+import com.example.mymoo.domain.store.util.StoreUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,11 +31,11 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -119,9 +123,10 @@ public class StoreServiceImpl implements StoreService {
                 updated += 1;
                 Store newStore = Store.builder()
                         .name(row.getName())
-                        .visitCount(0)
+                        .likeCount(0)
                         .usableDonation(0L)
                         .zipCode(row.getZipcode())
+                        .address(row.getAddressNew())
                         .longitude(row.getLOGT())
                         .latitude(row.getLAT())
                         .build();
@@ -136,4 +141,29 @@ public class StoreServiceImpl implements StoreService {
         log.info(updated + " number of Rows Updating Complete");
         log.info("Storing Table Update Complete");
     }
+
+    public StoreListDTO getAllStoresByLocation(Double logt, Double lat, int page, int size){
+        List<Store> legecies = storeRepository.findAll();
+        Map<Integer, Store> storeMap = new HashMap<>();
+        for(Store store : legecies){
+            storeMap.put(StoreUtil.calculateDistance(logt, lat, store.getLongitude(), store.getLatitude()), store);
+        }
+        List<Integer> storeList = new ArrayList<>(storeMap.keySet());
+        storeList.sort(Comparator.naturalOrder());
+        List<Store> selectedStores = new ArrayList<>();
+        for (int i= page*size ; i<page*size+size ;i++) {
+            selectedStores.add(storeMap.get(storeList.get(i)));
+        }
+        return new StoreListDTO(selectedStores);
+    }
+    public StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable){
+        Page<Store> storesFindByKeyword = storeRepository.findAllByNameContainsOrAddressContains(keyword, keyword, pageable);
+        List<Store> selectedStores = storesFindByKeyword.stream().toList();
+        return new StoreListDTO(selectedStores);
+    }
+    public StoreListDTO getAllStores(Pageable pageable){
+        Page<Store> storesFindAll = storeRepository.findAll(pageable);
+        return new StoreListDTO(storesFindAll.getContent());
+    }
+
 }

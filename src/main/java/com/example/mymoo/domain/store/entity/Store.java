@@ -36,10 +36,23 @@ public class Store extends BaseEntity {
     @Column(name = "ZipCode", nullable = false, columnDefinition = "char(10)")
     private String zipCode;
 
+    @Column(name = "Address", nullable = false)
+    private String address;
+
     @Min(value = 0, message = "방문 횟수는 0 이상이어야 합니다.")
     @Column(nullable = false)
     @ColumnDefault("0")
-    private Integer visitCount;
+    private Integer likeCount;
+
+    @Min(value = 0, message = "리뷰 갯수는 0 이상이어야 합니다.")
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Integer reviewCount;
+
+    @Min(value = 0, message = "총 후원 금액은 0 이상이어야 합니다.")
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Long allDonation;
 
     @Min(value = 0, message = "이용 가능 금액은 0 이상이어야 합니다.")
     @Column(nullable = false)
@@ -67,7 +80,10 @@ public class Store extends BaseEntity {
     public Store(
             String name,
             String zipCode,
-            Integer visitCount,
+            String address,
+            Integer likeCount,
+            Integer reviewCount,
+            Long allDonation,
             Long usableDonation,
             AddressOld addressOld,
             AddressNew addressNew,
@@ -76,7 +92,10 @@ public class Store extends BaseEntity {
             Account account) {
         this.name = name;
         this.zipCode = zipCode;
-        this.visitCount = visitCount;
+        this.address = address;
+        this.likeCount = likeCount;
+        this.reviewCount = reviewCount;
+        this.allDonation = allDonation;
         this.usableDonation = usableDonation;
         this.addressOld = addressOld;
         this.addressNew = addressNew;
@@ -85,12 +104,13 @@ public class Store extends BaseEntity {
         this.account = account;
     }
 
-
-
-
-    public void incrementVisitCount() {
-        this.visitCount++;
+    public void incrementLikeCount() {
+        this.likeCount++;
     }
+    public void decrementLikeCount() { this.likeCount--; }
+
+    public void incrementReviewCount() { this.reviewCount++; }
+    public void decrementReviewCount() { this.reviewCount--; }
 
     public void addUsableDonation(Long amount) {
         if (amount <= 0) {
@@ -108,7 +128,6 @@ public class Store extends BaseEntity {
         }
         this.usableDonation -= amount;
     }
-
     public void updateAddressOld(AddressOld addressOld) {
         this.addressOld = addressOld;
     }
