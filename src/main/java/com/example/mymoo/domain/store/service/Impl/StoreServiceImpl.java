@@ -1,177 +1,102 @@
 package com.example.mymoo.domain.store.service.Impl;
 
+import com.example.mymoo.domain.account.entity.Account;
 import com.example.mymoo.domain.account.repository.AccountRepository;
-import com.example.mymoo.domain.store.dto.api.Row;
+import com.example.mymoo.domain.store.dto.response.MenuListDTO;
 import com.example.mymoo.domain.store.dto.response.StoreDetailDTO;
 import com.example.mymoo.domain.store.dto.response.StoreListDTO;
-import com.example.mymoo.domain.store.entity.AddressNew;
-import com.example.mymoo.domain.store.entity.AddressOld;
-import com.example.mymoo.domain.store.entity.Store;
-import com.example.mymoo.domain.store.repository.AddressNewRepository;
-import com.example.mymoo.domain.store.repository.AddressOldRepository;
+import com.example.mymoo.domain.store.entity.*;
+import com.example.mymoo.domain.store.repository.LikeRepository;
 import com.example.mymoo.domain.store.repository.StoreRepository;
 import com.example.mymoo.domain.store.service.StoreService;
 import com.example.mymoo.domain.store.util.StoreUtil;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.URI;
 import java.util.*;
 
-@Service
+@Service @Transactional
 @RequiredArgsConstructor
 public class StoreServiceImpl implements StoreService {
 
-    private final RestTemplate restTemplate = new RestTemplate();
     private final StoreRepository storeRepository;
-    private final AddressOldRepository addressOldRepository;
-    private final AddressNewRepository addressNewRepository;
+    private final LikeRepository likeRepository;
     private final AccountRepository accountRepository;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final int All_PAGE = 10;
-    private final int PAGE_SIZE = 10;
-
-    @Value("${api.storeData.uri}") String uri;
-    @Value("${api.storeData.key}") String key;
-
-    @PostConstruct @Transactional
-    public void updateStore(){
-        log.info("Storing Table Update Start...");
-        List<Store> legecyStores = storeRepository.findAll();
-        List<Row> allRows = new ArrayList<>();
-
-        log.info("Receiving Data from OpenAPI Start...");
-        for (int i=1; i<=All_PAGE; i++) {
-            URI requestUrl = UriComponentsBuilder
-                    .fromUriString(uri)
-                    .queryParam("key", key)
-                    .queryParam("pSize", PAGE_SIZE)
-                    .queryParam("pIndex", i)
-                    .encode()
-                    .build()
-                    .toUri();
-
-            String response = restTemplate.getForObject(requestUrl, String.class);
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            try {
-
-                // optional, but recommended
-                // process XML securely, avoid attacks like XML External Entities (XXE)
-                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(new InputSource(new StringReader(response)));
-
-                NodeList rowDocs = doc.getDocumentElement().getElementsByTagName("row");
-
-                for (int j=0; j<rowDocs.getLength();j++){
-                    String rowContents = rowDocs.item(j).getTextContent();
-                    String[]  rowContent = rowContents.split("\n");
-                    Double logt;
-                    Double lat;
-                    if (rowContent[8].isBlank() || rowContent[9].isBlank()){
-                        logt = 0.0;
-                        lat = 0.0;
-                    }else{
-                        logt = Double.parseDouble(rowContent[8]);
-                        lat = Double.parseDouble(rowContent[9]);
-                    }
-                    allRows.add( Row.builder()
-                                    .name(rowContent[3])
-                                    .adderssOld(rowContent[5])
-                                    .addressNew(rowContent[6])
-                                    .zipcode(rowContent[7])
-                                    .LOGT(logt)
-                                    .LAT(lat)
-                                    .build()
-                    );
-                }
-                log.info(i+"th Page recived (DataSize = "+ rowDocs.getLength() +")");
-
-            } catch (ParserConfigurationException | IOException | SAXException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        log.info("Receiving Data from OpenAPI Complete (" + allRows.size() +" number of Data Received)");
-        log.info("Storing New Data Start...");
-        int updated = 0;
-        for (Row row : allRows) {
-            boolean isNew = legecyStores.stream().noneMatch(store -> store.getName().equals(row.getName()));
-            if (isNew) {
-                updated += 1;
-                Store newStore = Store.builder()
-                        .name(row.getName())
-                        .likeCount(0)
-                        .usableDonation(0L)
-                        .zipCode(row.getZipcode())
-                        .address(row.getAddressNew())
-                        .longitude(row.getLOGT())
-                        .latitude(row.getLAT())
-                        .build();
-
-                storeRepository.save(newStore);
-
-                addressOldRepository.save(AddressOld.convertToAddress(row.getAdderssOld(), newStore));
-                addressNewRepository.save(AddressNew.convertToAddress(row.getAddressNew(), newStore));
-
-            }
-        }
-        log.info(updated + " number of Rows Updating Complete");
-        log.info("Storing Table Update Complete");
-    }
-
-    public StoreListDTO getAllStoresByLocation(Double logt, Double lat, int page, int size){
-        List<Store> legecies = storeRepository.findAll();
+    // 위치기반으로 음식점을 조회
+    public StoreListDTO getAllStoresByLocation(Double logt, Double lat, int page, int size, Long accountId){
+        List<Store> foundStores = storeRepository.findAll();
         Map<Integer, Store> storeMap = new HashMap<>();
-        for(Store store : legecies){
+        for(Store store : foundStores){
             storeMap.put(StoreUtil.calculateDistance(logt, lat, store.getLongitude(), store.getLatitude()), store);
         }
         List<Integer> storeList = new ArrayList<>(storeMap.keySet());
         storeList.sort(Comparator.naturalOrder());
         List<Store> selectedStores = new ArrayList<>();
-        for (int i= page*size ; i<page*size+size ;i++) {
+        for (int i=page*size ; i<page*size+size ;i++) {
             selectedStores.add(storeMap.get(storeList.get(i)));
         }
-        return new StoreListDTO(selectedStores);
+        List<Like> likes = likeRepository.findAllByAccountId(accountId);
+        return new StoreListDTO(selectedStores, likes, page, size);
     }
-    public StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable){
+
+    //keyword 를 포함하는 음식점명, 주소를 가진 음식점을 조회
+    public StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable, Long accountId){
         Page<Store> storesFindByKeyword = storeRepository.findAllByNameContainsOrAddressContains(keyword, keyword, pageable);
         List<Store> selectedStores = storesFindByKeyword.stream().toList();
-        return new StoreListDTO(selectedStores);
+        List<Like> likes = likeRepository.findAllByAccountId(accountId);
+        return new StoreListDTO(selectedStores, likes, pageable.getPageNumber(), pageable.getPageSize());
     }
-    public StoreListDTO getAllStores(Pageable pageable){
+
+    //모든 음식점을 조회
+    public StoreListDTO getAllStores(Pageable pageable, Long accountId){
         Page<Store> storesFindAll = storeRepository.findAll(pageable);
-        return new StoreListDTO(storesFindAll.getContent());
+        List<Like> likes = likeRepository.findAllByAccountId(accountId);
+        return new StoreListDTO(storesFindAll.getContent(), likes, pageable.getPageNumber(), pageable.getPageSize());
     }
-    public StoreDetailDTO getStoreById(Long id){
-        Optional<Store> found = storeRepository.findById(id);
-        if (found.isPresent()){
-            return new StoreDetailDTO(found.get());
+
+    //음식점 id로 음식점을 조회
+    public StoreDetailDTO getStoreById(Long storeId, Long accountId){
+        Store found = storeRepository.findById(storeId).orElseThrow(RuntimeException::new);
+        Optional<Like> foundLike = likeRepository.findByAccountIdAndStoreId(accountId,storeId);
+        return new StoreDetailDTO(found, foundLike.isEmpty());
+    }
+
+    //음식점 id로 메뉴를 조회
+    public MenuListDTO getMenusByStoreId(Long id){
+        Store found = storeRepository.findById(id).orElseThrow(RuntimeException::new);
+        List<Menu> foundMenus = found.getMenus();
+        return new MenuListDTO(foundMenus);
+    }
+
+    //음식점 좋아요 수정
+    public String updateStoreLikeCount(Long storeId, Long accountId){
+        Optional<Like> foundLike = likeRepository.findByAccountIdAndStoreId(accountId,storeId);
+        if (foundLike.isPresent()){
+            Like like = foundLike.get();
+            Store store = like.getStore();
+            store.decrementLikeCount();
+            storeRepository.save(store);
+            likeRepository.delete(like);
+            return "likeCount--";
         }else{
-            throw new RuntimeException();
+            Store foundStore = storeRepository.findById(storeId).orElseThrow(RuntimeException::new);
+            Account foundAccount = accountRepository.findById(accountId).orElseThrow(RuntimeException::new);
+
+            foundStore.incrementLikeCount();
+
+            likeRepository.save(
+                    Like.builder()
+                    .account(foundAccount)
+                    .store(foundStore)
+                    .build());
+            return "likeCount++";
         }
     }
 
