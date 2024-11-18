@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 public enum DonationExceptionDetails implements ExceptionDetails {
     // 입력 받은 donation id가 donation 테이블에 존재하지 않을 때
     DONATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 donation id입니다."),
-    // 자신의 가게가 아닌 다른 가게의 후원을 사용하려 할 때
-    FORBIDDEN_ACCESS_TO_OTHER_STORE(HttpStatus.FORBIDDEN, "해당 후원을 사용할 권한이 없습니다."),
     // 이미 사용된 후원을 사용하려 할 때
     DONATION_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용된 후원입니다.")
     ;

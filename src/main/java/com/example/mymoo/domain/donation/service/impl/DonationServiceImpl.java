@@ -5,6 +5,8 @@ import com.example.mymoo.domain.account.exception.AccountException;
 import com.example.mymoo.domain.account.exception.AccountExceptionDetails;
 import com.example.mymoo.domain.account.repository.AccountRepository;
 import com.example.mymoo.domain.donation.dto.request.DonationRequestDto;
+import com.example.mymoo.domain.donation.dto.response.ReadAccountDonationListResponseDto;
+import com.example.mymoo.domain.donation.dto.response.ReadStoreDonationListResponseDto;
 import com.example.mymoo.domain.donation.entity.Donation;
 import com.example.mymoo.domain.donation.exception.DonationException;
 import com.example.mymoo.domain.donation.exception.DonationExceptionDetails;
@@ -14,8 +16,11 @@ import com.example.mymoo.domain.store.entity.Store;
 import com.example.mymoo.domain.store.exception.StoreException;
 import com.example.mymoo.domain.store.exception.StoreExceptionDetails;
 import com.example.mymoo.domain.store.repository.StoreRepository;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,22 +61,40 @@ public class DonationServiceImpl implements DonationService {
     }
 
     @Override
-    public void setIsUsedToTrue(
+    public ReadStoreDonationListResponseDto getStoreDonationList(
         final Long storeId,
-        final Long donationId
+        final Pageable pageable
     ) {
-        Donation donation = donationRepository.findById(donationId)
-            .orElseThrow(() -> new DonationException(DonationExceptionDetails.DONATION_NOT_FOUND));
-        Store store = donation.getStore();
-        // 자신의 가게가 아닌 다른 가게의 후원을 사용하려 할 때
-        if (!Objects.equals(storeId, store.getId())){
-            throw new DonationException(DonationExceptionDetails.FORBIDDEN_ACCESS_TO_OTHER_STORE);
+        // 해당 storeId가 없는 경우
+        if (!storeRepository.existsById(storeId)){
+            throw new StoreException(StoreExceptionDetails.STORE_NOT_FOUND);
         }
-        // 사용 여부 업데이트
-        donation.setIsUsedToTrue();
-        // 사용 가능한 후원 금액 감소
-        store.useUsableDonation(donation.getPoint());
-        // store 계정의 point 증가. 향후 현금으로 바꿀 수 있음
-        store.getAccount().chargePoint(donation.getPoint());
+        return ReadStoreDonationListResponseDto.from(
+            donationRepository.findAllByStore_IdAndIsUsedFalse(storeId, pageable)
+        );
+    }
+
+    @Override
+    public ReadAccountDonationListResponseDto getAccountDonationList(
+        final Long accountId,
+        final Integer limit,
+        final Pageable pageable
+    ) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new AccountException(AccountExceptionDetails.ACCOUNT_NOT_FOUND);
+        }
+
+        Slice<Donation> donations = (limit == null) ?
+            donationRepository.findAllByAccount_Id(
+                accountId,
+                pageable
+            )
+            : donationRepository.findRecentDonationsByAccountId(
+                accountId,
+                LocalDateTime.now().minusMonths(limit),
+                pageable
+            );
+
+        return ReadAccountDonationListResponseDto.from(donations);
     }
 }
