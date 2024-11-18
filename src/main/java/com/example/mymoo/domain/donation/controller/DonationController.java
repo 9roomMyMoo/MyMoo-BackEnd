@@ -2,6 +2,7 @@ package com.example.mymoo.domain.donation.controller;
 
 import com.example.mymoo.domain.donation.dto.request.DonationRequestDto;
 import com.example.mymoo.domain.donation.dto.response.ReadAccountDonationListResponseDto;
+import com.example.mymoo.domain.donation.dto.response.ReadDonationResponseDto;
 import com.example.mymoo.domain.donation.dto.response.ReadStoreDonationListResponseDto;
 import com.example.mymoo.domain.donation.service.DonationService;
 import com.example.mymoo.global.security.CustomUserDetails;
@@ -93,5 +94,24 @@ public class DonationController {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(donationService.getAccountDonationList(accountId, limit, pageable));
+    }
+
+    @Operation(
+        summary = "[후원자] 자신의 후원 상세 조회",
+        description = "후원자 자신의 후원을 조회합니다. 후원자 계정의 Access token을 header에 넣었는지 확인해주세요",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+        }
+    )
+    @GetMapping("/donations/{donationId}")
+    @PreAuthorize("hasAuthority('DONATOR')")
+    public ResponseEntity<ReadDonationResponseDto> getDonation(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long donationId
+    ) {
+        Long accountId = userDetails.getAccountId();
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(donationService.getDonation(accountId, donationId));
     }
 }

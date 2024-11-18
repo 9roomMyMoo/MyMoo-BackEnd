@@ -33,13 +33,13 @@ public record ReadStoreDonationListResponseDto(
     public record DonationDto(
         Long point,
         String donator,
-        LocalDateTime createdAt
+        LocalDateTime donatedAt
     ) {
         public static DonationDto from(Donation donation) {
             return DonationDto.builder()
                 .point(donation.getPoint())
                 .donator(donation.getAccount().getNickname())
-                .createdAt(donation.getCreatedAt())
+                .donatedAt(donation.getCreatedAt())
                 .build();
         }
     }

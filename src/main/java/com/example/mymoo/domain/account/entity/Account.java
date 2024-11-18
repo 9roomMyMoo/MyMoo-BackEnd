@@ -2,8 +2,6 @@ package com.example.mymoo.domain.account.entity;
 
 import com.example.mymoo.domain.account.exception.AccountException;
 import com.example.mymoo.domain.account.exception.AccountExceptionDetails;
-import com.example.mymoo.domain.donation.exception.DonationException;
-import com.example.mymoo.domain.donation.exception.DonationExceptionDetails;
 import com.example.mymoo.global.entity.BaseEntity;
 import com.example.mymoo.global.enums.UserRole;
 import jakarta.persistence.Column;

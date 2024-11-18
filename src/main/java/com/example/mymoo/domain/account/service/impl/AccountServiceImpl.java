@@ -4,6 +4,7 @@ import com.example.mymoo.domain.account.dto.request.AccountCreateRequestDto;
 import com.example.mymoo.domain.account.dto.request.ChargePointsRequestDto;
 import com.example.mymoo.domain.account.dto.response.AccountCreateResponseDto;
 import com.example.mymoo.domain.account.dto.response.ChargePointsResponseDto;
+import com.example.mymoo.domain.account.dto.response.ReadAccountResponseDto;
 import com.example.mymoo.domain.account.entity.Account;
 import com.example.mymoo.domain.account.exception.AccountException;
 import com.example.mymoo.domain.account.exception.AccountExceptionDetails;
@@ -58,6 +59,14 @@ public class AccountServiceImpl implements AccountService {
         return ChargePointsResponseDto.builder()
             .point(account.getPoint())
             .build();
+    }
+
+    @Override
+    public ReadAccountResponseDto getAccount(final Long accountId) {
+        return ReadAccountResponseDto.from(
+            accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountException(AccountExceptionDetails.ACCOUNT_NOT_FOUND))
+        );
     }
 
     private String getDefaultImage(){
