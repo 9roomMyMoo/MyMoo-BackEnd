@@ -5,6 +5,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+# dummy data insert script
+data-dummy.sql
+
 # config file
 /src/main/resources/application-dev.yml
 

@@ -1,21 +1,28 @@
 package com.example.mymoo.domain.donation.controller;
 
 import com.example.mymoo.domain.donation.dto.request.DonationRequestDto;
+import com.example.mymoo.domain.donation.dto.response.ReadAccountDonationListResponseDto;
+import com.example.mymoo.domain.donation.dto.response.ReadStoreDonationListResponseDto;
 import com.example.mymoo.domain.donation.service.DonationService;
 import com.example.mymoo.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -52,29 +59,39 @@ public class DonationController {
     }
 
     @Operation(
-        summary = "[음식점] 특정 후원을 사용 처리",
-        description = "음식점 계정에서 QR코드 인식 시 해당 API를 호출합니다. 음식점 계정의 Access token을 header에 넣었는지 확인해주세요",
+        summary = "[공통] 음식점 후원 목록 전체 조회",
+        description = "특정 음식점의 후원 목록을 조회합니다. 사용 가능한 후원들만 오래된 순으로 반환합니다.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "수정 성공"),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
         }
     )
-    @PatchMapping("/{donationId}")
-    @PreAuthorize("hasAuthority('STORE')")
-    public ResponseEntity<Void> setIsUsedToTrue(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long donationId
+    @GetMapping("/donations/stores/{storeId}")
+    public ResponseEntity<ReadStoreDonationListResponseDto> getStoreDonationList(
+        @PathVariable Long storeId,
+        @PageableDefault(size = 10, sort = "createdAt", direction = Direction.ASC) @Parameter(hidden = true) Pageable pageable
     ) {
-        Long storeId = userDetails.getAccountId();
-
-        // TODO - 알림 기능 추가
-
-        donationService.setIsUsedToTrue(
-            storeId,
-            donationId
-        );
-
         return ResponseEntity
             .status(HttpStatus.OK)
-            .build();
+            .body(donationService.getStoreDonationList(storeId, pageable));
+    }
+
+    @Operation(
+        summary = "[후원자] 자신의 후원 목록 전체 조회",
+        description = "후원자 자신의 후원 목록을 조회합니다. 후원자 계정의 access token을 header에 넣었는지 확인해주세요.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+        }
+    )
+    @GetMapping("/donations/accounts")
+    @PreAuthorize("hasAuthority('DONATOR')")
+    public ResponseEntity<ReadAccountDonationListResponseDto> getAccountDonationList(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestParam(required = false) Integer limit,
+        @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) @Parameter(hidden = true) Pageable pageable
+    ) {
+        Long accountId = userDetails.getAccountId();
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(donationService.getAccountDonationList(accountId, limit, pageable));
     }
 }
