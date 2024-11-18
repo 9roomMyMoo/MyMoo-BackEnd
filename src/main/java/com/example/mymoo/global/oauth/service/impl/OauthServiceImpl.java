@@ -124,7 +124,7 @@ public class OauthServiceImpl implements OAuthService {
         String profileImageUrl = userInfo.kakaoAccount().profile().profileImageUrl();
         log.info("received kakao data. email: {} nickname: {} profileImageUrl: {}", kakaoUserEmail, nickname, profileImageUrl);
         if (profileImageUrl == null){
-            profileImageUrl = "DefaultProfileImageUrl"; // TODO - S3 기본 이미지 이용
+            profileImageUrl = getDefaultImage();
         }
         return Account.builder()
             .email(kakaoUserEmail)
@@ -156,5 +156,13 @@ public class OauthServiceImpl implements OAuthService {
             .refreshToken(refreshToken)
             .isNewUser(isNewUser)
             .build();
+    }
+
+    private String getDefaultImage(){
+        if (Math.random() < 0.5) {
+            return "https://mymoo.s3.ap-northeast-2.amazonaws.com/%EB%A7%88%EC%9D%B4.png";
+        } else {
+            return "https://mymoo.s3.ap-northeast-2.amazonaws.com/%EB%AC%B4.png";
+        }
     }
 }

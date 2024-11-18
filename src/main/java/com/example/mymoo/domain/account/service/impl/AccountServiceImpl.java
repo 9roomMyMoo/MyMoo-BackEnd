@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService {
                 .email(accountCreateRequestDto.email())
                 .password(passwordEncoder.encode(accountCreateRequestDto.password()))
                 .nickname(accountCreateRequestDto.nickname())
-                .profileImageUrl("defaultImageUrl") // TODO - S3 default image url로 변경
+                .profileImageUrl(getDefaultImage())
                 .phoneNumber(accountCreateRequestDto.phoneNumber())
                 .point(0L)
                 .role(UserRole.valueOf(accountCreateRequestDto.userRole()))
@@ -58,5 +58,13 @@ public class AccountServiceImpl implements AccountService {
         return ChargePointsResponseDto.builder()
             .point(account.getPoint())
             .build();
+    }
+
+    private String getDefaultImage(){
+        if (Math.random() < 0.5) {
+            return "https://mymoo.s3.ap-northeast-2.amazonaws.com/%EB%A7%88%EC%9D%B4.png";
+        } else {
+            return "https://mymoo.s3.ap-northeast-2.amazonaws.com/%EB%AC%B4.png";
+        }
     }
 }
