@@ -6,18 +6,24 @@ import com.example.mymoo.domain.account.exception.AccountExceptionDetails;
 import com.example.mymoo.domain.account.repository.AccountRepository;
 import com.example.mymoo.domain.donation.dto.request.DonationRequestDto;
 import com.example.mymoo.domain.donation.dto.response.ReadAccountDonationListResponseDto;
+import com.example.mymoo.domain.donation.dto.response.ReadDonationResponseDto;
 import com.example.mymoo.domain.donation.dto.response.ReadStoreDonationListResponseDto;
 import com.example.mymoo.domain.donation.entity.Donation;
 import com.example.mymoo.domain.donation.exception.DonationException;
 import com.example.mymoo.domain.donation.exception.DonationExceptionDetails;
 import com.example.mymoo.domain.donation.repository.DonationRepository;
 import com.example.mymoo.domain.donation.service.DonationService;
+import com.example.mymoo.domain.donationusage.entity.DonationUsage;
+import com.example.mymoo.domain.donationusage.exception.DonationUsageException;
+import com.example.mymoo.domain.donationusage.exception.DonationUsageExceptionDetails;
+import com.example.mymoo.domain.donationusage.repository.DonationUsageRepository;
 import com.example.mymoo.domain.store.entity.Store;
 import com.example.mymoo.domain.store.exception.StoreException;
 import com.example.mymoo.domain.store.exception.StoreExceptionDetails;
 import com.example.mymoo.domain.store.repository.StoreRepository;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -32,6 +38,7 @@ public class DonationServiceImpl implements DonationService {
     private final AccountRepository accountRepository;
     private final StoreRepository storeRepository;
     private final DonationRepository donationRepository;
+    private final DonationUsageRepository donationUsageRepository;
 
     @Override
     public void createDonation(
@@ -96,5 +103,27 @@ public class DonationServiceImpl implements DonationService {
             );
 
         return ReadAccountDonationListResponseDto.from(donations);
+    }
+
+    @Override
+    public ReadDonationResponseDto getDonation(
+        final Long accountId,
+        final Long donationId
+    ) {
+        Donation donation = donationRepository.findById(donationId)
+            .orElseThrow(() -> new DonationException(DonationExceptionDetails.DONATION_NOT_FOUND));
+        // 남의 후원을 확인하려 할 때
+        if (!Objects.equals(donation.getAccount().getId(), accountId)){
+            throw new DonationException(DonationExceptionDetails.FORBIDDEN_ACCESS_TO_OTHER_DONATOR);
+        }
+
+        // 후원 사용 여부에 따라 response dto 다르게 구성
+        if (donation.getIsUsed()){
+            DonationUsage donationUsage = donationUsageRepository.findByDonation_id(donationId)
+                .orElseThrow(() -> new DonationUsageException(DonationUsageExceptionDetails.DONATION_USAGE_NOT_FOUND));
+            return ReadDonationResponseDto.from(donation, donationUsage);
+        } else{
+            return ReadDonationResponseDto.from(donation);
+        }
     }
 }

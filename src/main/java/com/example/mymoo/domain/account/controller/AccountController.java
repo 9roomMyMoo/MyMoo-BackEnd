@@ -6,6 +6,7 @@ import com.example.mymoo.domain.account.dto.request.AccountCreateRequestDto;
 import com.example.mymoo.domain.account.dto.request.ChargePointsRequestDto;
 import com.example.mymoo.domain.account.dto.response.AccountCreateResponseDto;
 import com.example.mymoo.domain.account.dto.response.ChargePointsResponseDto;
+import com.example.mymoo.domain.account.dto.response.ReadAccountResponseDto;
 import com.example.mymoo.domain.account.service.AccountService;
 import com.example.mymoo.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,5 +70,22 @@ public class AccountController {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(chargePointsResponseDto);
+    }
+
+    @Operation(
+        summary = "[공통] 사용자 계정 정보 읽기(마이페이지 화면)",
+        description = "사용자 계정 정보를 반환합니다.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "반환 성공"),
+        }
+    )
+    @GetMapping("/")
+    public ResponseEntity<ReadAccountResponseDto> getAccount(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long accountId = userDetails.getAccountId();
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(accountService.getAccount(accountId));
     }
 }

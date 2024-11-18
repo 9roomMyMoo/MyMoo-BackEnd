@@ -31,17 +31,19 @@ public record ReadAccountDonationListResponseDto(
     }
     @Builder
     public record DonationDto(
+        Long donationId,
         Long point,
         String store,
         Boolean isUsed,
-        LocalDateTime createdAt
+        LocalDateTime donatedAt
     ) {
         public static DonationDto from(Donation donation) {
             return DonationDto.builder()
+                .donationId(donation.getId())
                 .point(donation.getPoint())
                 .store(donation.getStore().getName())
                 .isUsed(donation.getIsUsed())
-                .createdAt(donation.getCreatedAt())
+                .donatedAt(donation.getCreatedAt())
                 .build();
         }
     }

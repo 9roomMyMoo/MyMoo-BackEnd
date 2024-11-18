@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
                 loginRequestDto.password()
             )
         );
-        log.info("인증 완료", authentication.getName());
+        log.info("인증 완료: {}", authentication.getName());
 
         // JWT 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(authentication);
