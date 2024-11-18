@@ -1,25 +1,15 @@
 package com.example.mymoo.domain.store.entity;
 
 import com.example.mymoo.domain.account.entity.Account;
-import com.example.mymoo.domain.store.dto.response.GDreamCardResponse;
 import com.example.mymoo.domain.store.exception.StoreException;
 import com.example.mymoo.domain.store.exception.StoreExceptionDetails;
 import com.example.mymoo.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.boot.autoconfigure.amqp.RabbitConnectionDetails;
+
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,10 +26,18 @@ public class Store extends BaseEntity {
     @Column(name = "ZipCode", nullable = false, columnDefinition = "char(10)")
     private String zipCode;
 
+    @Column(name = "Address", nullable = false)
+    private String address;
+
     @Min(value = 0, message = "방문 횟수는 0 이상이어야 합니다.")
     @Column(nullable = false)
     @ColumnDefault("0")
-    private Integer visitCount;
+    private Integer likeCount;
+
+    @Min(value = 0, message = "총 후원 금액은 0 이상이어야 합니다.")
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Long allDonation;
 
     @Min(value = 0, message = "이용 가능 금액은 0 이상이어야 합니다.")
     @Column(nullable = false)
@@ -58,39 +56,44 @@ public class Store extends BaseEntity {
     @Column(name = "latitude", nullable = false)
     private Double latitude;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-//    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "account_id")
+    @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
+    private List<Menu> menus;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "accountId")
     private Account account;
 
     @Builder
     public Store(
             String name,
             String zipCode,
-            Integer visitCount,
+            String address,
+            Integer likeCount,
+            Long allDonation,
             Long usableDonation,
             AddressOld addressOld,
             AddressNew addressNew,
             Double longitude,
             Double latitude,
-            Account account) {
+            Account account,
+            List<Menu> menus
+            ) {
         this.name = name;
         this.zipCode = zipCode;
-        this.visitCount = visitCount;
+        this.address = address;
+        this.likeCount = likeCount;
+        this.allDonation = allDonation;
         this.usableDonation = usableDonation;
         this.addressOld = addressOld;
         this.addressNew = addressNew;
         this.longitude = longitude;
         this.latitude = latitude;
         this.account = account;
+        this.menus = menus;
     }
 
-
-
-
-    public void incrementVisitCount() {
-        this.visitCount++;
-    }
+    public void incrementLikeCount() { this.likeCount++; }
+    public void decrementLikeCount() { this.likeCount--; }
 
     public void addUsableDonation(Long amount) {
         if (amount <= 0) {
@@ -108,7 +111,6 @@ public class Store extends BaseEntity {
         }
         this.usableDonation -= amount;
     }
-
     public void updateAddressOld(AddressOld addressOld) {
         this.addressOld = addressOld;
     }

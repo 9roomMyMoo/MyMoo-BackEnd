@@ -49,7 +49,10 @@ public class AddressNew {
         this.store = store;
     }
 
-
+    @Override
+    public String toString(){
+        return Do+" "+sigun+" "+gu+" "+dongUepmean+" "+ro+" "+detail;
+    }
 
 
     public static AddressNew convertToAddress(String address, Store store) {
