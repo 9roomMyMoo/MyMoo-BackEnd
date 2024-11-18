@@ -1,7 +1,6 @@
 package com.example.mymoo.domain.store.entity;
 
 import com.example.mymoo.domain.account.entity.Account;
-import com.example.mymoo.domain.store.dto.response.GDreamCardResponse;
 import com.example.mymoo.domain.store.exception.StoreException;
 import com.example.mymoo.domain.store.exception.StoreExceptionDetails;
 import com.example.mymoo.global.entity.BaseEntity;
@@ -17,9 +16,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.boot.autoconfigure.amqp.RabbitConnectionDetails;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

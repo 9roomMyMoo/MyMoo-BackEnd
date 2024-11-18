@@ -1,7 +1,8 @@
 package com.example.mymoo.domain.store.service.Impl;
 
 import com.example.mymoo.domain.account.repository.AccountRepository;
-import com.example.mymoo.domain.store.dto.response.Row;
+import com.example.mymoo.domain.store.dto.api.Row;
+import com.example.mymoo.domain.store.dto.response.StoreDetailDTO;
 import com.example.mymoo.domain.store.dto.response.StoreListDTO;
 import com.example.mymoo.domain.store.entity.AddressNew;
 import com.example.mymoo.domain.store.entity.AddressOld;
@@ -164,6 +165,14 @@ public class StoreServiceImpl implements StoreService {
     public StoreListDTO getAllStores(Pageable pageable){
         Page<Store> storesFindAll = storeRepository.findAll(pageable);
         return new StoreListDTO(storesFindAll.getContent());
+    }
+    public StoreDetailDTO getStoreById(Long id){
+        Optional<Store> found = storeRepository.findById(id);
+        if (found.isPresent()){
+            return new StoreDetailDTO(found.get());
+        }else{
+            throw new RuntimeException();
+        }
     }
 
 }

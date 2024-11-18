@@ -1,4 +1,4 @@
-package com.example.mymoo.domain.store.dto.response;
+package com.example.mymoo.domain.store.dto.api;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;

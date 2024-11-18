@@ -1,5 +1,6 @@
 package com.example.mymoo.domain.store.service;
 
+import com.example.mymoo.domain.store.dto.response.StoreDetailDTO;
 import com.example.mymoo.domain.store.dto.response.StoreListDTO;
 import org.springframework.data.domain.Pageable;
 
@@ -13,4 +14,5 @@ public interface StoreService {
     StoreListDTO getAllStoresByLocation(Double logt, Double lat, int page, int size);
     StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable);
     StoreListDTO getAllStores(Pageable pageable);
+    StoreDetailDTO getStoreById(Long id);
 }
