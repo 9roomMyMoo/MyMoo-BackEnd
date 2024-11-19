@@ -20,7 +20,13 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        
+
+    # yml 추가
+    - name: Set YML
+      run: |
+        echo "${{ secrets.APPLICATION_DEV_YML }}" | base64 --decode > src/main/resources/application-dev.yml
+        find src
+
     - name: Run chmod to make gradlew executable
       run: chmod +x ./gradlew
 
@@ -43,7 +49,7 @@ jobs:
 
     # 5. Docker Hub 이미지 푸시
     - name: docker Hub push
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/knufest
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/mymoo
 
   # 위 과정에서 푸시한 이미지를 ec2에서 풀받아서 실행시키는 과정 
   run-docker-image-on-ec2:
