@@ -61,7 +61,13 @@ jobs:
       # 1. mymoo 폴더로 이동
       - name: cd to mymoo
         run: cd /home/ubuntu/mymoo
-        
+
+      - name: run wpd
+        run: pwd
+
+      - name: ls -al
+        run: ls -al
+      
       # 2. docker-compose 종료
       - name: docker-compose down
         run: sudo docker-compose down
