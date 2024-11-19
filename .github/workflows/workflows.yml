@@ -60,8 +60,8 @@ jobs:
     steps:
       # 1. mymoo 폴더로 이동
       - name: cd to mymoo
-        run: cd mymoo
-
+        run: cd /home/ubuntu/mymoo
+        
       # 2. docker-compose 종료
       - name: docker-compose down
         run: sudo docker compose down
