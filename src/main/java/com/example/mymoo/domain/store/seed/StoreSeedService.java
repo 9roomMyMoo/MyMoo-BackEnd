@@ -303,7 +303,7 @@ public class StoreSeedService {
                         .usableDonation(0L)
                         .zipCode(row.getZipcode())
                         .address(row.getAddressNew().substring(4))
-                        .imagePath(storeImages.get(index))
+                        .imagePath(storeImages.get(index%5))
                         .longitude(row.getLOGT())
                         .latitude(row.getLAT())
                         .build();
