@@ -33,7 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // jwt 헤더가 없는 경우 다음 필터로
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new JwtException("토큰 인식 불가");
+            filterChain.doFilter(request, response);
+            return;
         }
 
         String jwt = authorizationHeader.substring(7); // 토큰 부분만 추출
@@ -59,5 +60,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/api/v1/auth/login") ||
+            path.startsWith("/api/v1/accounts/signup") ||
+            path.startsWith("/api/v1/auth/token/refresh") ||
+            path.startsWith("/api/v1/oauth/") ||
+            path.equals("/") ||
+            path.startsWith("/swagger-ui/") ||
+            path.startsWith("/v3/api-docs/");
     }
 }
