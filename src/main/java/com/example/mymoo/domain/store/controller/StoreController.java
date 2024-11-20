@@ -9,6 +9,7 @@ import com.example.mymoo.domain.store.service.StoreService;
 import com.example.mymoo.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +33,13 @@ public class StoreController {
     private final StoreRepository storeRepository;
 
     @GetMapping("")
-    @Operation(description = "가게를 검색하여 조회하는 api 입니다. logt(경도), lat(위도) 를 보내면 현재 위치기반, keyword 를 보내면 keyword 기반검색, 아무것도 보내지 않으면 모든 상점을 조회합니다. *likeable 은 좋아요를 누를 수 있는지 없는지 입니다.")
+    @Operation(
+            summary = "[공통]음식점 전체 조회",
+            description = "가게를 검색하여 조회하는 api 입니다. logt(경도), lat(위도) 를 보내면 현재 위치기반, keyword 를 보내면 keyword 기반검색, 아무것도 보내지 않으면 모든 상점을 조회합니다. *likeable 은 좋아요를 누를 수 있는지 없는지 입니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+            }
+    )
     public ResponseEntity<StoreListDTO> getAllStore(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "page 의 순서를 의미합니다.") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
@@ -69,7 +76,13 @@ public class StoreController {
     }
 
     @GetMapping("{storeId}")
-    @Operation(description = "id 값으로 기준으로 특정 가게를 조회하는 api 입니다. *likeable 은 좋아요를 누를 수 있는지 없는지 입니다.")
+    @Operation(
+            summary = "[공통]음식점 상세 조회",
+            description = "id 값으로 기준으로 특정 가게를 조회하는 api 입니다. *likeable 은 좋아요를 누를 수 있는지 없는지 입니다.",
+            responses = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+        }
+    )
     public ResponseEntity<StoreDetailDTO> getStoreById(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "가게의 id값 입니다.") @PathVariable("storeId") Long storeId
@@ -79,7 +92,13 @@ public class StoreController {
     }
 
     @GetMapping("{storeId}/menus")
-    @Operation(description = "id 값으로 기준으로 특정 가게의 메뉴를 조회하는 api 입니다.")
+    @Operation(
+            summary = "[음식점]가게 메뉴 조회",
+            description = "id 값으로 기준으로 특정 가게의 메뉴 조회하는 api 입니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+            }
+    )
     public ResponseEntity<MenuListDTO> getMenusByStoreId(
             @Parameter(description = "가게의 id값 입니다.") @PathVariable("storeId") Long id
     ){
@@ -87,7 +106,13 @@ public class StoreController {
     }
 
     @PatchMapping("{storeId}")
-    @Operation(description = "id 값으로 기준으로 특정 가게의 좋아요를 반영합니다. 이미 누른 경우 좋아요가 1 감소되고 누르지 않은 경우 좋아요가 1 증가됩니다.")
+    @Operation(
+            summary = "[음식점]가게 좋아요 증가/감소",
+            description = "id 값으로 기준으로 특정 가게의 좋아요를 반영합니다. 이미 누른 경우 좋아요가 1 감소되고 누르지 않은 경우 좋아요가 1 증가됩니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+            }
+    )
     public ResponseEntity<StoreResponseDTO> updateStoreLikeCount(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "가게의 id값 입니다.") @PathVariable("storeId") Long id
