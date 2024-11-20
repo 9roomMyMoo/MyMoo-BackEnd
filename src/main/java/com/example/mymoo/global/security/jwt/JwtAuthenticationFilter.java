@@ -33,8 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // jwt 헤더가 없는 경우 다음 필터로
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+            throw new JwtException("토큰 인식 불가");
         }
 
         String jwt = authorizationHeader.substring(7); // 토큰 부분만 추출
