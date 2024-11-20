@@ -10,6 +10,7 @@ public class StoreDetailDTO {
     private Long id;
     private String name;
     private String address;
+    private String imagePath;
     private Integer likeCount;
     private Integer reviewCount;
     private Long allDonation;
@@ -19,6 +20,7 @@ public class StoreDetailDTO {
     public StoreDetailDTO(Store store, boolean likeable){
         this.id = store.getId();
         this.name = store.getName();
+        this.imagePath = store.getImagePath();
         this.address = store.getAddress();
         this.likeCount = store.getLikeCount();
         this.allDonation = store.getAllDonation();

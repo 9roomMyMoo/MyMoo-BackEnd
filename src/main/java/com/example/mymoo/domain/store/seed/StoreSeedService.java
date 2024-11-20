@@ -112,6 +112,14 @@ public class StoreSeedService {
                 throw new RuntimeException(e);
             }
         }
+
+        List<String> storeImages = new ArrayList<>();
+        storeImages.add("https://mymoo.s3.ap-northeast-2.amazonaws.com/menu_images/%EB%8D%AE%EB%B0%A5%EC%A7%91/store.jpg");
+        storeImages.add("https://mymoo.s3.ap-northeast-2.amazonaws.com/menu_images/%EC%98%A4%EB%B0%94%EC%83%81%EB%8F%88%EA%B9%8C%EC%8A%A4/store.jpg");
+        storeImages.add("https://mymoo.s3.ap-northeast-2.amazonaws.com/menu_images/%EC%98%AC%EB%8D%B0%EC%9D%B4%ED%8C%8C%EC%8A%A4%ED%83%80/store.jpg\n");
+        storeImages.add("https://mymoo.s3.ap-northeast-2.amazonaws.com/menu_images/%EC%A7%AC%EB%BD%95%EA%B4%80/store.jpg");
+        storeImages.add("https://mymoo.s3.ap-northeast-2.amazonaws.com/menu_images/%EC%B0%8C%EA%B0%9C%EB%8D%95%ED%9B%84/store.jpg");
+
         List<MenuDTO> no1SeedMenus = new ArrayList<>();
         no1SeedMenus.add(MenuDTO.builder()
                 .name("김치치킨마요덮밥")
@@ -295,6 +303,7 @@ public class StoreSeedService {
                         .usableDonation(0L)
                         .zipCode(row.getZipcode())
                         .address(row.getAddressNew().substring(4))
+                        .imagePath(storeImages.get(index))
                         .longitude(row.getLOGT())
                         .latitude(row.getLAT())
                         .build();

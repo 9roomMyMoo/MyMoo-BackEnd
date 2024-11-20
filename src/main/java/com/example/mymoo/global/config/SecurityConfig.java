@@ -68,7 +68,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/token/refresh").permitAll()
                 .requestMatchers("/api/v1/oauth/**").permitAll()
                 .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/**").permitAll() // TODO - 수정
                 .anyRequest().authenticated() // 나머지 요청은 인증 필요
         );
 
