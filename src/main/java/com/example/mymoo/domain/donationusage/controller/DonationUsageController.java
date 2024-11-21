@@ -29,7 +29,7 @@ public class DonationUsageController {
             @ApiResponse(responseCode = "201", description = "사용 처리 성공"),
         }
     )
-    @PostMapping("/donation-usages")
+    @PostMapping("/")
     @PreAuthorize("hasAuthority('STORE')")
     public ResponseEntity<Void> useDonation(
         @AuthenticationPrincipal CustomUserDetails userDetails,

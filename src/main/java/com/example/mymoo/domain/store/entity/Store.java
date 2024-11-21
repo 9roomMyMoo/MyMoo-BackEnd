@@ -29,6 +29,9 @@ public class Store extends BaseEntity {
     @Column(name = "Address", nullable = false)
     private String address;
 
+    @Column(name = "ImagePath", nullable = false)
+    private String imagePath;
+
     @Min(value = 0, message = "방문 횟수는 0 이상이어야 합니다.")
     @Column(nullable = false)
     @ColumnDefault("0")
@@ -68,6 +71,7 @@ public class Store extends BaseEntity {
             String name,
             String zipCode,
             String address,
+            String imagePath,
             Integer likeCount,
             Long allDonation,
             Long usableDonation,
@@ -81,6 +85,7 @@ public class Store extends BaseEntity {
         this.name = name;
         this.zipCode = zipCode;
         this.address = address;
+        this.imagePath = imagePath;
         this.likeCount = likeCount;
         this.allDonation = allDonation;
         this.usableDonation = usableDonation;

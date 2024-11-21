@@ -93,7 +93,7 @@ public class StoreController {
 
     @GetMapping("{storeId}/menus")
     @Operation(
-            summary = "[음식점]가게 메뉴 조회",
+            summary = "[공통]가게 메뉴 조회",
             description = "id 값으로 기준으로 특정 가게의 메뉴 조회하는 api 입니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -107,7 +107,7 @@ public class StoreController {
 
     @PatchMapping("{storeId}")
     @Operation(
-            summary = "[음식점]가게 좋아요 증가/감소",
+            summary = "[공통]가게 좋아요 증가/감소",
             description = "id 값으로 기준으로 특정 가게의 좋아요를 반영합니다. 이미 누른 경우 좋아요가 1 감소되고 누르지 않은 경우 좋아요가 1 증가됩니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
