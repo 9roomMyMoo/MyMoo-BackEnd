@@ -42,7 +42,7 @@ public class StoreServiceImpl implements StoreService {
         for (int i=page*size ; i<page*size+size ;i++) {
             selectedStores.add(storeMap.get(storeList.get(i)));
         }
-        List<Like> likes = likeRepository.findAllByAccountId(accountId);
+        List<Like> likes = likeRepository.findAllByAccount_Id(accountId);
         return new StoreListDTO(selectedStores, likes, page, size);
     }
 
@@ -50,21 +50,21 @@ public class StoreServiceImpl implements StoreService {
     public StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable, Long accountId){
         Page<Store> storesFindByKeyword = storeRepository.findAllByNameContainsOrAddressContains(keyword, keyword, pageable);
         List<Store> selectedStores = storesFindByKeyword.stream().toList();
-        List<Like> likes = likeRepository.findAllByAccountId(accountId);
+        List<Like> likes = likeRepository.findAllByAccount_Id(accountId);
         return new StoreListDTO(selectedStores, likes, pageable.getPageNumber(), pageable.getPageSize());
     }
 
     //모든 음식점을 조회
     public StoreListDTO getAllStores(Pageable pageable, Long accountId){
         Page<Store> storesFindAll = storeRepository.findAll(pageable);
-        List<Like> likes = likeRepository.findAllByAccountId(accountId);
+        List<Like> likes = likeRepository.findAllByAccount_Id(accountId);
         return new StoreListDTO(storesFindAll.getContent(), likes, pageable.getPageNumber(), pageable.getPageSize());
     }
 
     //음식점 id로 음식점을 조회
     public StoreDetailDTO getStoreById(Long storeId, Long accountId){
         Store found = storeRepository.findById(storeId).orElseThrow(RuntimeException::new);
-        Optional<Like> foundLike = likeRepository.findByAccountIdAndStoreId(accountId,storeId);
+        Optional<Like> foundLike = likeRepository.findByAccount_IdAndStore_Id(accountId,storeId);
         return new StoreDetailDTO(found, foundLike.isEmpty());
     }
 
@@ -77,7 +77,7 @@ public class StoreServiceImpl implements StoreService {
 
     //음식점 좋아요 수정
     public String updateStoreLikeCount(Long storeId, Long accountId){
-        Optional<Like> foundLike = likeRepository.findByAccountIdAndStoreId(accountId,storeId);
+        Optional<Like> foundLike = likeRepository.findByAccount_IdAndStore_Id(accountId,storeId);
         if (foundLike.isPresent()){
             Like like = foundLike.get();
             Store store = like.getStore();

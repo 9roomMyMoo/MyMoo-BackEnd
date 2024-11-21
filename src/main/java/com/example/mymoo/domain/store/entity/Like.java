@@ -18,11 +18,11 @@ public class Like {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accountId")
+    @JoinColumn(name = "account_id")
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "storeId")
+    @JoinColumn(name = "store_id")
     private Store store;
 
     @Builder

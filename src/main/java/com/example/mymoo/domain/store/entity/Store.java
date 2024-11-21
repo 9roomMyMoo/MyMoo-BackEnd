@@ -63,7 +63,7 @@ public class Store extends BaseEntity {
     private List<Menu> menus;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accountId")
+    @JoinColumn(name = "account_id")
     private Account account;
 
     @Builder
