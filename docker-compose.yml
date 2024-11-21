@@ -6,9 +6,9 @@ services:
     volumes:
       - ./init:/docker-entrypoint-initdb.d
     ports:
-      - 3307:3306
+      - 3306:3306
     environment:
-      - MARIADB_ROOT_PASSWORD=1234
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
     networks:
       - mymoo-network
     healthcheck:
@@ -18,12 +18,10 @@ services:
       timeout: 5s
       retries: 3
 
-
   my-cache-server:
     image: redis:6.2.6
     hostname: my-cache-server
     container_name: my-cache-server
-    # command: redis-server --requirepass redis_password --port 6379
     ports:
       - 6379:6379
     networks:
