@@ -27,7 +27,7 @@ public class ChildServiceImpl implements ChildService {
 
         childRepository.findByAccountId(request.getAccountId())
                 .ifPresent(child -> {new ChildException(ChildExceptionDetails.CHILD_ALREADY_EXISTS);});
-        
+
         return childRepository.save(
                 Child.builder()
                         .account(foundAcccount)

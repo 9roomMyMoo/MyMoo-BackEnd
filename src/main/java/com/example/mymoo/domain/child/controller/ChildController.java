@@ -33,7 +33,7 @@ public class ChildController {
                     @ApiResponse(responseCode = "201", description = "아동 정보생성 성공"),
             }
     )
-    @PostMapping("")
+    @PostMapping("/")
     public ResponseEntity<ChildResponseDTO> createChild(
             @RequestBody ChildReqeustDTO request) {
         Child newChild = childService.createChild(request);
