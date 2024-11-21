@@ -6,6 +6,8 @@ import com.example.mymoo.domain.account.exception.AccountExceptionDetails;
 import com.example.mymoo.domain.account.repository.AccountRepository;
 import com.example.mymoo.domain.child.dto.request.ChildReqeustDTO;
 import com.example.mymoo.domain.child.entity.Child;
+import com.example.mymoo.domain.child.exception.ChildException;
+import com.example.mymoo.domain.child.exception.ChildExceptionDetails;
 import com.example.mymoo.domain.child.repository.ChildRepository;
 import com.example.mymoo.domain.child.service.ChildService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,9 @@ public class ChildServiceImpl implements ChildService {
         Account foundAcccount = accountRepository.findById(request.getAccountId())
                 .orElseThrow(()->new AccountException(AccountExceptionDetails.ACCOUNT_NOT_FOUND));
 
+        childRepository.findByAccountId(request.getAccountId())
+                .ifPresent(child -> {new ChildException(ChildExceptionDetails.CHILD_ALREADY_EXISTS);});
+        
         return childRepository.save(
                 Child.builder()
                         .account(foundAcccount)
