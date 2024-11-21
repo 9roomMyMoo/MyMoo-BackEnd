@@ -42,7 +42,7 @@ public class DonationUsageServiceImpl implements DonationUsageService {
     ) {
         Donation donation = donationRepository.findById(donationUsageCreateRequestDto.donationId())
                 .orElseThrow(() -> new DonationException(DonationExceptionDetails.DONATION_NOT_FOUND));
-        Child child = childRepository.findById(donationUsageCreateRequestDto.childId())
+        Child child = childRepository.findByAccount_Id(donationUsageCreateRequestDto.childAccountId())
                 .orElseThrow(() -> new ChildException(ChildExceptionDetails.CHILD_NOT_FOUND));
         Store store = storeRepository.findByAccount_Id(storeAccountId)
             .orElseThrow(() -> new StoreException(StoreExceptionDetails.STORE_NOT_FOUND));

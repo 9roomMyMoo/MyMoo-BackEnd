@@ -151,7 +151,7 @@ public class OauthServiceImpl implements OAuthService {
         // Jwt 및 로그인 정보 전달
         return KakaoLoginResponseDto.builder()
             .accountId(account.getId())
-            .userRole(String.valueOf(account.getRole()))
+            .userRole(account.getRole().getAuthority())
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .isNewUser(isNewUser)

@@ -10,29 +10,31 @@ import com.example.mymoo.domain.child.exception.ChildException;
 import com.example.mymoo.domain.child.exception.ChildExceptionDetails;
 import com.example.mymoo.domain.child.repository.ChildRepository;
 import com.example.mymoo.domain.child.service.ChildService;
+import com.example.mymoo.global.enums.UserRole;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service @Transactional
 @RequiredArgsConstructor
 public class ChildServiceImpl implements ChildService {
-    private ChildRepository childRepository;
-    private AccountRepository accountRepository;
+    private final ChildRepository childRepository;
+    private final AccountRepository accountRepository;
 
     public Child createChild(ChildReqeustDTO request){
-        Account foundAcccount = accountRepository.findById(request.getAccountId())
+        Account foundAccount = accountRepository.findById(request.getAccountId())
                 .orElseThrow(()->new AccountException(AccountExceptionDetails.ACCOUNT_NOT_FOUND));
 
-        childRepository.findByAccountId(request.getAccountId())
-                .ifPresent(child -> {new ChildException(ChildExceptionDetails.CHILD_ALREADY_EXISTS);});
+        if (childRepository.existsByAccount_Id(request.getAccountId())){
+            throw new ChildException(ChildExceptionDetails.CHILD_ALREADY_EXISTS);
+        }
 
+        foundAccount.changeUserRoleTo(UserRole.CHILD);
         return childRepository.save(
-                Child.builder()
-                        .account(foundAcccount)
-                        .cardNumber(request.getCardNumber())
-                        .build()
+            Child.builder()
+                .account(foundAccount)
+                .cardNumber(request.getCardNumber())
+                .build()
         );
     }
 }
