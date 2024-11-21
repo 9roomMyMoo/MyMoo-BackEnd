@@ -26,7 +26,9 @@ public class ChildController {
 
     @Operation(
             summary = "[아동] 아동정보 생성",
-            description = "account 가 아동회원일 경우 아동에 대한 정보를 추가하는 api 입니다. account signUp 후에 accountId 값과 cardNumber 를 requestBody 에 보내주시고 cardNumber 는 따로 검증하지 않는 String 으로 보내주시면 됩니다.",
+            description = "account 가 아동회원일 경우 아동에 대한 정보를 추가하는 api 입니다. " +
+                    "account signUp 후에 accountId 값과 cardNumber 를 requestBody 에 보내주시고 " +
+                    "cardNumber 는 따로 검증하지 않는 String 으로 보내주시면 됩니다.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "아동 정보생성 성공"),
             }
