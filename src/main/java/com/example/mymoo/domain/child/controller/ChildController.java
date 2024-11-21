@@ -37,7 +37,8 @@ public class ChildController {
     public ResponseEntity<ChildResponseDTO> createChild(
             @RequestBody ChildReqeustDTO request) {
         Child newChild = childService.createChild(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ChildResponseDTO(HttpStatus.CREATED, newChild, "tb_child row++"));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ChildResponseDTO(HttpStatus.CREATED, newChild, "tb_child row++"));
     }
 
 }
