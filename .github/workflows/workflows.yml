@@ -70,10 +70,10 @@ jobs:
       - name: docker-compose down
         run: sudo docker-compose down
 
-      # 3. 안쓰는 이미지 제거
-      - name: Remove unused Docker images
-        run: sudo docker image prune -af --filter "until=24h"
-
-      # 4. docker-compose 실행
+      # 3. docker-compose 실행
       - name: docker-compose up
         run: sudo docker-compose up -d 
+
+      # 4. 안쓰는 이미지 제거
+      - name: Remove unused Docker images
+        run: sudo docker image prune -f
