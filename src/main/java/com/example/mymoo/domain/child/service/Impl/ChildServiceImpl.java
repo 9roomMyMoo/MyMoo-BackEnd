@@ -18,8 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service @Transactional
 @RequiredArgsConstructor
 public class ChildServiceImpl implements ChildService {
-    private ChildRepository childRepository;
-    private AccountRepository accountRepository;
+
+    private final ChildRepository childRepository;
+    private final AccountRepository accountRepository;
 
     public Child createChild(ChildReqeustDTO request){
         Account foundAcccount = accountRepository.findById(request.getAccountId())
