@@ -10,7 +10,8 @@ public record ReadAccountResponseDto(
     String phone_number,
     String nickname,
     Long point,
-    String profileImageUrl
+    String profileImageUrl,
+    String role
 ) {
     public static ReadAccountResponseDto from(Account account){
         return ReadAccountResponseDto.builder()
@@ -20,6 +21,7 @@ public record ReadAccountResponseDto(
             .nickname(account.getNickname())
             .point(account.getPoint())
             .profileImageUrl(account.getProfileImageUrl())
+            .role(account.getRole().getAuthority())
             .build();
     }
 }

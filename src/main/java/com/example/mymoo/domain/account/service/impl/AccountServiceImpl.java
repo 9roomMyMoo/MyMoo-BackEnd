@@ -61,6 +61,7 @@ public class AccountServiceImpl implements AccountService {
             .build();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ReadAccountResponseDto getAccount(final Long accountId) {
         return ReadAccountResponseDto.from(
