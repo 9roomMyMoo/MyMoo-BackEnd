@@ -37,7 +37,7 @@ public class AccountServiceImpl implements AccountService {
                 .nickname(accountCreateRequestDto.nickname())
                 .profileImageUrl(getDefaultImage())
                 .phoneNumber(accountCreateRequestDto.phoneNumber())
-                .point(0L)
+                .point(50000L)
                 .role(UserRole.valueOf(accountCreateRequestDto.userRole()))
                 .build()
         );

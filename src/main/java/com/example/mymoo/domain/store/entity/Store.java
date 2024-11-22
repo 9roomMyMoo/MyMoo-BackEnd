@@ -47,10 +47,10 @@ public class Store extends BaseEntity {
     @ColumnDefault("0")
     private Long usableDonation;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne( mappedBy = "store", fetch = FetchType.LAZY)
     private AddressOld addressOld;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne( mappedBy = "store", fetch = FetchType.LAZY)
     private AddressNew addressNew;
 
     @Column(name = "longitude", nullable = false)
@@ -62,7 +62,7 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
     private List<Menu> menus;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
 

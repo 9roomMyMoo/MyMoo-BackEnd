@@ -1,5 +1,9 @@
 package com.example.mymoo.domain.store.seed;
 
+import com.example.mymoo.domain.account.entity.Account;
+import com.example.mymoo.domain.account.exception.AccountException;
+import com.example.mymoo.domain.account.exception.AccountExceptionDetails;
+import com.example.mymoo.domain.account.repository.AccountRepository;
 import com.example.mymoo.domain.store.dto.api.Row;
 import com.example.mymoo.domain.store.dto.response.MenuDTO;
 import com.example.mymoo.domain.store.entity.AddressNew;
@@ -10,6 +14,7 @@ import com.example.mymoo.domain.store.repository.AddressNewRepository;
 import com.example.mymoo.domain.store.repository.AddressOldRepository;
 import com.example.mymoo.domain.store.repository.MenuRepository;
 import com.example.mymoo.domain.store.repository.StoreRepository;
+import com.example.mymoo.global.enums.UserRole;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +38,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +50,7 @@ public class StoreSeedService {
     private final AddressNewRepository addressNewRepository;
     private final AddressOldRepository addressOldRepository;
     private final MenuRepository menuRepository;
+    private final AccountRepository accountRepository;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -290,6 +297,29 @@ public class StoreSeedService {
 
         log.info("Receiving Data from OpenAPI Complete (" + allRows.size() +" number of Data Received)");
         log.info("Storing New Data Start...");
+
+        //test 용 store 계정
+        Optional<Account> foundStoreAccount = accountRepository.findByEmail("store@example.com");
+        Account storeAccount;
+        String nickname = "himodu";
+
+        if(foundStoreAccount.isEmpty()){
+            storeAccount = accountRepository.save(
+                    Account.builder()
+                            .email("store@example.com")
+                            .password("$2a$10$lvFlzuzYnfLH.i8SvyLWv.AL79ttob4QqvMqz0VSFKesDrXg980su")
+                            .nickname("himodu")
+                            .profileImageUrl("https://mymoo.s3.ap-northeast-2.amazonaws.com/%EB%AC%B4.png")
+                            .phoneNumber("01098765432")
+                            .point(50000L)
+                            .role(UserRole.STORE)
+                            .build()
+            );
+            accountRepository.save(storeAccount);
+        }else{
+            storeAccount = foundStoreAccount.get();
+        }
+
         int updated = 0;
         int index = 0;
         for (Row row : allRows) {
@@ -306,11 +336,10 @@ public class StoreSeedService {
                         .imagePath(storeImages.get(index%5))
                         .longitude(row.getLOGT())
                         .latitude(row.getLAT())
+                        .account(storeAccount)
                         .build();
 
                 storeRepository.save(newStore);
-
-                System.out.println(newStore.getId());
 
                 List<Menu> menuSet = new ArrayList<>();
                 for (MenuDTO menu : allSeedMenus.get(index%5)){

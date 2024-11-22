@@ -4,6 +4,8 @@ import com.example.mymoo.domain.store.dto.response.MenuListDTO;
 import com.example.mymoo.domain.store.dto.response.StoreDetailDTO;
 import com.example.mymoo.domain.store.dto.response.StoreListDTO;
 import com.example.mymoo.domain.store.dto.response.StoreResponseDTO;
+import com.example.mymoo.domain.store.exception.StoreException;
+import com.example.mymoo.domain.store.exception.StoreExceptionDetails;
 import com.example.mymoo.domain.store.repository.StoreRepository;
 import com.example.mymoo.domain.store.service.StoreService;
 import com.example.mymoo.global.security.CustomUserDetails;
@@ -54,9 +56,8 @@ public class StoreController {
         System.out.println(accountId);
         if (logt != null && lat != null) {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(storeService.getAllStoresByLocation(logt, lat, page, size, accountId));
-        }else if(keyword != null) {
-            System.out.println(keyword);
+                        .body(storeService.getAllStoresByLocation(logt, lat, page, size, accountId));
+        }else if(keyword != null){
             if (sort.equals("desc")){
                 Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, sortby);
                 return ResponseEntity.status(HttpStatus.OK)
@@ -66,7 +67,7 @@ public class StoreController {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(storeService.getAllStoresByKeyword(keyword, pageable, accountId));
             }else{
-                throw new RuntimeException();
+                throw new StoreException(StoreExceptionDetails.QUERY_PARAMETER_INVALID);
             }
         }else{
             Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, sortby);
