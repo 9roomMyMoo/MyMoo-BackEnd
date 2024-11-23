@@ -49,7 +49,6 @@ public class StoreServiceImpl implements StoreService {
     //keyword 를 포함하는 음식점명, 주소를 가진 음식점을 조회
     public StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable, Long accountId, Double logt, Double lat){
         Page<Store> storesFoundByKeyword = storeRepository.findAllByNameContainsOrAddressContains(keyword, keyword, pageable);
-        System.out.println(keyword);
         List<Store> selectedStores = storesFoundByKeyword.stream().toList();
         List<Like> likes = likeRepository.findAllByAccount_Id(accountId);
         return new StoreListDTO(selectedStores, likes, pageable.getPageNumber(), pageable.getPageSize(), logt, lat);
