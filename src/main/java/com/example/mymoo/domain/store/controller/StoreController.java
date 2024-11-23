@@ -46,8 +46,7 @@ public class StoreController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "page 의 순서를 의미합니다.") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @Parameter(description = "page 의 크기를 의미합니다.") @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-            @Parameter(description = "정렬 기준입니다. 오름차순: asc 내림차순: desc") @RequestParam(value = "sort", required = false, defaultValue = "asc") String sort,
-            @Parameter(description = "정렬할 대상입니다. 가게명: name, 주소: address") @RequestParam(value = "sortby", required = false, defaultValue = "name") String sortby,
+            @Parameter(description = "정렬 기준입니다. 좋아요 많은 순: likeCount, 후원금액 높은 순: usableDonation, 리뷰 많은 순: reviewCount") @RequestParam(value = "sortby", required = false, defaultValue = "name") String sortby,
             @Parameter(description = "검색할 keyword를 의미합니다.") @RequestParam(value = "keyword", required = false) String keyword,
             @Parameter(description = "현재위치의 경도를 의미합니다.") @RequestParam(value = "logt", required = false) Double logt,
             @Parameter(description = "현재위치의 위도를 의미합니다.")  @RequestParam(value = "lat", required = false) Double lat
@@ -55,24 +54,16 @@ public class StoreController {
         Long accountId = userDetails.getAccountId();
         System.out.println(accountId);
         if (logt != null && lat != null) {
-            return ResponseEntity.status(HttpStatus.OK)
+            if(keyword == null){
+                return ResponseEntity.status(HttpStatus.OK)
                         .body(storeService.getAllStoresByLocation(logt, lat, page, size, accountId));
-        }else if(keyword != null){
-            if (sort.equals("desc")){
+            }else{
                 Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, sortby);
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(storeService.getAllStoresByKeyword(keyword, pageable, accountId));
-            }else if(sort.equals("asc")){
-                Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, sortby);
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(storeService.getAllStoresByKeyword(keyword, pageable, accountId));
-            }else{
-                throw new StoreException(StoreExceptionDetails.QUERY_PARAMETER_INVALID);
+                            .body(storeService.getAllStoresByKeyword("밥", pageable, accountId, logt, lat));
             }
         }else{
-            Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, sortby);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(storeService.getAllStores(pageable, accountId));
+            throw new StoreException(StoreExceptionDetails.QUERY_PARAMETER_INVALID);
         }
     }
 

@@ -3,6 +3,7 @@ package com.example.mymoo.domain.store.dto.response;
 import com.example.mymoo.domain.store.entity.Like;
 import com.example.mymoo.domain.store.entity.Store;
 import com.example.mymoo.domain.store.util.KeyValuePair;
+import com.example.mymoo.domain.store.util.StoreUtil;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,11 +17,11 @@ public class StoreListDTO {
     private int size;
     private List<StoreListElement> stores;
 
-    public StoreListDTO(List<Store> stores, List<Like> likes, int page, int size) {
+    public StoreListDTO(List<Store> stores, List<Like> likes, int page, int size, double logt, double lat) {
         this.totalCount = stores.size();
         this.page = page;
         this.size = size;
-        this.stores = stores.stream().map(StoreListElement::StoreListElement).toList();
+        this.stores = stores.stream().map(store -> StoreListElement.from(store, logt, lat)).toList();
         updateLikeable(likes);
     }
 
@@ -48,8 +49,9 @@ public class StoreListDTO {
         private double longitude;
         private double latitude;
         private boolean likeable;
+        private Integer distance;
 
-        public static StoreListElement StoreListElement(Store store) {
+        public static StoreListElement from(Store store, Double logt, Double lat) {
             return StoreListElement.builder()
                     .storeId(store.getId())
                     .name(store.getName())
@@ -61,6 +63,7 @@ public class StoreListDTO {
                     .usableDonation(store.getUsableDonation())
                     .longitude(store.getLongitude())
                     .latitude(store.getLatitude())
+                    .distance(StoreUtil.calculateDistance(logt, lat, store.getLongitude(), store.getLatitude()))
                     .build();
         }
 
@@ -69,7 +72,19 @@ public class StoreListDTO {
         }
 
         @Builder
-        public StoreListElement(Long storeId, String name, String address, double stars, String imagePath, int likeCount, int reviewCount, Long usableDonation, double longitude, double latitude) {
+        public StoreListElement(
+                final Long storeId,
+                final String name,
+                final String address,
+                final double stars,
+                final String imagePath,
+                final int likeCount,
+                final int reviewCount,
+                final Long usableDonation,
+                final double longitude,
+                final double latitude,
+                final Integer distance
+        ){
             this.storeId = storeId;
             this.name = name;
             this.address = address;
@@ -80,6 +95,7 @@ public class StoreListDTO {
             this.usableDonation = usableDonation;
             this.longitude = longitude;
             this.latitude = latitude;
+            this.distance = distance;
             this.likeable = true;
         }
     }

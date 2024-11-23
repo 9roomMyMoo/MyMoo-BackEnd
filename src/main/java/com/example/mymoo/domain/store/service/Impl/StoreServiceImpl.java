@@ -43,22 +43,16 @@ public class StoreServiceImpl implements StoreService {
             selectedStores.add(storeMap.get(storeList.get(i)));
         }
         List<Like> likes = likeRepository.findAllByAccount_Id(accountId);
-        return new StoreListDTO(selectedStores, likes, page, size);
+        return new StoreListDTO(selectedStores, likes, page, size, logt, lat);
     }
 
     //keyword 를 포함하는 음식점명, 주소를 가진 음식점을 조회
-    public StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable, Long accountId){
-        Page<Store> storesFindByKeyword = storeRepository.findAllByNameContainsOrAddressContains(keyword, keyword, pageable);
-        List<Store> selectedStores = storesFindByKeyword.stream().toList();
+    public StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable, Long accountId, Double logt, Double lat){
+        Page<Store> storesFoundByKeyword = storeRepository.findAllByNameContainsOrAddressContains(keyword, keyword, pageable);
+        System.out.println(keyword);
+        List<Store> selectedStores = storesFoundByKeyword.stream().toList();
         List<Like> likes = likeRepository.findAllByAccount_Id(accountId);
-        return new StoreListDTO(selectedStores, likes, pageable.getPageNumber(), pageable.getPageSize());
-    }
-
-    //모든 음식점을 조회
-    public StoreListDTO getAllStores(Pageable pageable, Long accountId){
-        Page<Store> storesFindAll = storeRepository.findAll(pageable);
-        List<Like> likes = likeRepository.findAllByAccount_Id(accountId);
-        return new StoreListDTO(storesFindAll.getContent(), likes, pageable.getPageNumber(), pageable.getPageSize());
+        return new StoreListDTO(selectedStores, likes, pageable.getPageNumber(), pageable.getPageSize(), logt, lat);
     }
 
     //음식점 id로 음식점을 조회

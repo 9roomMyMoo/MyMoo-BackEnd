@@ -12,8 +12,7 @@ import java.util.List;
 public interface StoreService {
 
     StoreListDTO getAllStoresByLocation(Double logt, Double lat, int page, int size, Long accountId);
-    StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable, Long accountId);
-    StoreListDTO getAllStores(Pageable pageable, Long accountId);
+    StoreListDTO getAllStoresByKeyword(String keyword, Pageable pageable, Long accountId, Double logt, Double lat);
     StoreDetailDTO getStoreById(Long storeid, Long accountId);
     MenuListDTO getMenusByStoreId(Long id);
     String updateStoreLikeCount(Long storeId, Long accountId);
