@@ -11,7 +11,7 @@ public record ReadAccountResponseDto(
     String nickname,
     Long point,
     String profileImageUrl,
-    String role
+    String userRole
 ) {
     public static ReadAccountResponseDto from(Account account){
         return ReadAccountResponseDto.builder()
@@ -21,7 +21,7 @@ public record ReadAccountResponseDto(
             .nickname(account.getNickname())
             .point(account.getPoint())
             .profileImageUrl(account.getProfileImageUrl())
-            .role(account.getRole().getAuthority())
+            .userRole(account.getRole().getAuthority())
             .build();
     }
 }
