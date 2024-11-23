@@ -94,12 +94,7 @@ public class Account extends BaseEntity {
     }
 
     public void changeUserRoleTo(UserRole userRole){
-        if (Objects.equals(this.role.getAuthority(), "DONATOR")){
             this.role = userRole;
-        }
-        else{
-            throw new AccountException(AccountExceptionDetails.NOT_ABLE_TO_CHANGE_ROLE);
-        }
     }
 
 }
