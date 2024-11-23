@@ -59,7 +59,7 @@ public class StoreController {
             }else{
                 Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, sortby);
                 return ResponseEntity.status(HttpStatus.OK)
-                            .body(storeService.getAllStoresByKeyword("밥", pageable, accountId, logt, lat));
+                            .body(storeService.getAllStoresByKeyword(keyword, pageable, accountId, logt, lat));
             }
         }else{
             throw new StoreException(StoreExceptionDetails.QUERY_PARAMETER_INVALID);
