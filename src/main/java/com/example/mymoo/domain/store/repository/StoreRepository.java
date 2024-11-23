@@ -12,5 +12,5 @@ import java.util.List;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
     Page<Store> findAllByNameContainsOrAddressContains(String nameKeyword, String addressKeyword, Pageable pageable);
-    Optional<Store> findByAccount_Id(Long storeAccountId);
+    List<Store> findAllByAccount_Id(Long storeAccountId);
 }
