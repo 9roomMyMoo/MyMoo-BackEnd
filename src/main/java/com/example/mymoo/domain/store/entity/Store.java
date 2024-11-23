@@ -32,6 +32,14 @@ public class Store extends BaseEntity {
     @Column(name = "ImagePath", nullable = false)
     private String imagePath;
 
+    @Column(name = "Stars", nullable = false)
+    private Double stars;
+
+    @Min(value = 0, message = "총 리뷰 갯수는 0 이상이어야 합니다.")
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Integer reviewCount;
+
     @Min(value = 0, message = "방문 횟수는 0 이상이어야 합니다.")
     @Column(nullable = false)
     @ColumnDefault("0")
@@ -72,6 +80,8 @@ public class Store extends BaseEntity {
             String zipCode,
             String address,
             String imagePath,
+            Double stars,
+            Integer reviewCount,
             Integer likeCount,
             Long allDonation,
             Long usableDonation,
@@ -86,6 +96,8 @@ public class Store extends BaseEntity {
         this.zipCode = zipCode;
         this.address = address;
         this.imagePath = imagePath;
+        this.stars = stars;
+        this.reviewCount = reviewCount;
         this.likeCount = likeCount;
         this.allDonation = allDonation;
         this.usableDonation = usableDonation;

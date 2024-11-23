@@ -41,6 +41,7 @@ public class StoreListDTO {
         private String name;
         private String address;
         private String imagePath;
+        private double stars;
         private int likeCount;
         private int reviewCount;
         private Long usableDonation;
@@ -54,7 +55,9 @@ public class StoreListDTO {
                     .name(store.getName())
                     .address(store.getAddress())
                     .imagePath(store.getImagePath())
+                    .stars(store.getStars())
                     .likeCount(store.getLikeCount())
+                    .reviewCount(store.getReviewCount())
                     .usableDonation(store.getUsableDonation())
                     .longitude(store.getLongitude())
                     .latitude(store.getLatitude())
@@ -66,11 +69,12 @@ public class StoreListDTO {
         }
 
         @Builder
-        public StoreListElement(Long storeId, String name, String address, String imagePath, int likeCount, int reviewCount, Long usableDonation, double longitude, double latitude) {
+        public StoreListElement(Long storeId, String name, String address, double stars, String imagePath, int likeCount, int reviewCount, Long usableDonation, double longitude, double latitude) {
             this.storeId = storeId;
             this.name = name;
             this.address = address;
             this.imagePath = imagePath;
+            this.stars = stars;
             this.likeCount = likeCount;
             this.reviewCount = reviewCount;
             this.usableDonation = usableDonation;

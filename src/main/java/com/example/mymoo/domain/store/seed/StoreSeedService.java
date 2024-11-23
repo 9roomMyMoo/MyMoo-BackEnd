@@ -301,7 +301,6 @@ public class StoreSeedService {
         //test 용 store 계정
         Optional<Account> foundStoreAccount = accountRepository.findByEmail("store@example.com");
         Account storeAccount;
-        String nickname = "himodu";
 
         if(foundStoreAccount.isEmpty()){
             storeAccount = accountRepository.save(
@@ -324,10 +323,13 @@ public class StoreSeedService {
         int index = 0;
         for (Row row : allRows) {
             boolean isNew = legecyStores.stream().noneMatch(store -> store.getName().equals(row.getName()));
+
             if (isNew) {
                 updated += 1;
                 Store newStore = Store.builder()
                         .name(row.getName())
+                        .stars(0.0)
+                        .reviewCount(0)
                         .likeCount(0)
                         .allDonation(0L)
                         .usableDonation(0L)
